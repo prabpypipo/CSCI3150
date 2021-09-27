@@ -28,11 +28,11 @@ int main(){
     for(int i = 0 ; i < 10 ; i ++){
         fscanf(fd, "%s", str) ;
         int num ;
-        sscanf(str, "%d", num) ;
+        sscanf(str, "%d", &num) ;
         num ++ ;
         sprintf(str, "%d" , num) ;
 
-        fprintf(fd_1, str) ;
+        fprintf(fd_1, "%s", str) ;
         fprintf(fd_1, "\n") ;
 
     }
