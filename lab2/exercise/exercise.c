@@ -18,5 +18,22 @@ TIP: You can use sscanf to convert char array to int and sprintf to convert int 
 
 */
 int main(){
+    FILE* fd ;
+    FILE* fd_1;
+    char str[1000] ;
 
+    fd = fopen("/input.txt" , "r") ;
+    fd_1 = fopen("/output.txt" , "w+") ;
+
+    for(int i = 0 ; i < 10 ; i ++){
+        fscanf(fd, "%s", str) ;
+        int num ;
+        sscanf(str, "%d", num) ;
+        num ++ ;
+        sprintf(str, "%d" , num) ;
+
+        fprintf(fd_1, str) ;
+        fprintf(fd_1, "\n") ;
+
+    }
 }
