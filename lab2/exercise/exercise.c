@@ -25,7 +25,9 @@ int main(){
     fd = fopen("/input.txt" , "r") ;
     fd_1 = fopen("/output.txt" , "w+") ;
 
-    for(int i = 0 ; i < 10 ; i ++){
+
+    int i ;
+    for(i = 0 ; i < 10 ; i ++){
         fscanf(fd, "%s", str) ;
         int num ;
         sscanf(str, "%d", &num) ;
