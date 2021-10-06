@@ -55,8 +55,10 @@ int main(void)
         continue;
       }
 
-      if ( (status = shell_execute(cmd_args, argc)) < 0 )
-        break;
+      if ( (status = shell_execute(cmd_args, argc)) < 0 ){
+        //printf("status = %d\n" , status) ;
+        break ;
+      }
     }
   }     
 

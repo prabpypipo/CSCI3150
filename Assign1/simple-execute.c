@@ -12,73 +12,82 @@ int shell_execute(char ** args, int argc)
 	if ( strcmp(args[0], "EXIT") == 0 )
 		return -1; 
 
-	printf("argc = %d\n", argc) ;
-	
-	/*
-	if(argc == 2){
-		if(strcmp(args[0], "ls") == 0){
-			char *cmd = "ls";
-        	char *argv[5];
-        	argv[0] = "ls";
-			argv[1] = NULL ;
-			execvp(cmd, argv);
-		}
-		else if(strcmp(args[0], "ps") == 0){
-			char *cmd = "ps";
-        	char *argv[5];
-        	argv[0] = "ps";
-			argv[1] = NULL ;
-			execvp(cmd, argv);
-		}
-	}
-	*/
+	//printf("aargc == %d\n" , argc) ;
 
 	int i ;
 	int count = 0 ;
 
-	char ***argset ;
+	char ** argset[100] ;
+	pid_t pid ;
 
-	argset[count ++] = args ;
+	argset[count] = & args[0] ;
+	count ++ ;
 
-	for(i = 0 ; i < argc ; i ++){
+	for(i = 0 ; i < argc - 1 ; i ++){
 		if(strcmp(args[i] , "|") == 0){
-			args[i] == NULL ;
-			argset[count ++] = args + (i + 1) ;
+			args[i] = NULL ;
+			argset[count] = & args[i + 1] ;
+			count ++ ;
 		}
 	}
+
 
 	int fd[100][2] ;
-	int ret ;
+	int ret, re ;
 
-	for(i = 0 ; i < count ; i ++){
+	//printf("count = %d\n" , count) ;
+
+	if(count == 1){
 		if((ret = fork()) == 0){
-			pipe(fd[i]) ;
-
-			if(i == 0){
-				close(1) ;
-				dup(fd[i][1]) ;
-				close(fd[i][0]) ;
-				close(fd[i][1]) ; 
-			}
-			else if(i == count - 1){
-				close(0);
-				dup(fd[i][0]) ;
-				close(fd[i][0]) ;
-			}
-			else{
-				close(0) ;
-				dup(fd[i][0]) ;
-				close(1) ;
-				dup(fd[i][1]) ;
-			}
-
-			char *cmd ;
-			strcpy(cmd , argset[i][0]) ;
-			execvp(cmd, argset[i]) ; 
+			execvp(argset[0][0], argset[0]) ; 
 		}
-		else break ;	
+		else{
+			pid = wait(&status);
+			return 0 ;
+		}
 	}
-			
-	return 0;
+	if((re = fork()) == 0){
+		for(i = 0 ; i < count - 1 ; i ++){
+			//printf("i = %d\n" , i) ;
+			pipe(fd[i]) ;
+			if((ret = fork()) == 0){
 
+				if(i == 0){
+					close(1) ;
+					dup(fd[i][1]) ;
+				}
+				else{
+					close(0) ;
+					dup(fd[i - 1][0]) ;
+
+					close(1) ;
+					dup(fd[i][1]) ;
+				}
+
+				int j ;
+				for(j = 0 ; j <= i ; j ++){
+					close(fd[j][0]) ;
+					close(fd[j][1]) ;
+				}
+
+				execvp(argset[i][0], argset[i]) ;
+			}
+		}
+
+		//for i == count - 1
+		close(0) ;
+		dup(fd[count - 2][0]) ;
+		int j ;
+		for(j = 0 ; j < count - 1 ; j ++){
+			close(fd[j][0]) ;
+			close(fd[j][1]) ;
+		}
+
+		execvp(argset[count - 1][0], argset[count - 1]) ;
+	}
+	else{
+		pid = wait(&status) ;
+	}
+
+	return 0 ;
 }
